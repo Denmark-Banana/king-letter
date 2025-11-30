@@ -1,9 +1,20 @@
-"use client";
+'use client';
 
 import { useEffect, useState } from "react";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import Link from 'next/link';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import Link from "next/link";
 
+interface Letter {
+  id: number;
+  receivedDate: string;
+  unsealed: string;
+  title: string;
+  sender: string;
+  isUnlocked: boolean;
+}
 type EmailItem = {
   id: string;
   sentAt: string;
@@ -13,6 +24,17 @@ type EmailItem = {
   template: string;
   recipient: string | null;
   senderId: string;
+};
+
+const formatKoreanDate = (dateStr: string): string => {
+  const parts = dateStr.split('.');
+  if (parts.length !== 3) return dateStr;
+
+  const year = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10); // 앞의 0 제거
+  const day = parseInt(parts[2], 10); // 앞의 0 제거
+  
+  return `${year}년 ${month}월 ${day}일`;
 };
 
 export default function InboxPage() {
@@ -38,99 +60,173 @@ export default function InboxPage() {
   }, []);
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-semibold">받은 편지함</h1>
+    <div className="min-h-screen bg-gradient-to-b from-sky-300 to-purple-200">
+      <div 
+        className="fixed inset-0 opacity-10 pointer-events-none"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='20' height='20' fill='%23000'/%3E%3C/svg%3E")`,
+          backgroundSize: '4px 4px',
+          imageRendering: 'pixelated'
+        }}
+      />
+      
+      <Header />
+      
+      <main className="max-w-[500px] mx-auto px-4 pt-20 pb-20">
+        <div className="mt-4">
+          {error && (
+            <div className="mb-4 rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+              {error}
+            </div>
+          )}
 
-      <SignedOut>
-        <div className="rounded-lg border border-zinc-200 p-6">
-          <p className="mb-4 text-zinc-700">로그인이 필요합니다.</p>
-          <SignInButton mode="modal">
-            <button className="h-10 rounded-full bg-indigo-600 px-5 text-sm font-semibold text-white">
-              Sign in
-            </button>
-          </SignInButton>
-        </div>
-      </SignedOut>
+          {!emails && !error && (
+            <div className="bg-white border-4 border-black p-8 pixel-shadow">
+              <div className="flex flex-col items-center justify-center gap-4">
+                <div className="relative">
+                  <div className="w-16 h-16 bg-purple-500 border-4 border-black pixel-shadow animate-bounce">
+                    <div className="absolute inset-2 bg-purple-400 border-2 border-black flex items-center justify-center">
+                      <i className="ri-mail-fill text-white text-2xl"></i>
+                    </div>
+                  </div>
+                </div>
+                <p className="font-bold text-xl text-gray-700">편지함을 불러오는 중...</p>
+                <div className="flex gap-1">
+                  <div className="w-2 h-2 bg-purple-500 border border-black animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                  <div className="w-2 h-2 bg-purple-500 border border-black animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                  <div className="w-2 h-2 bg-purple-500 border border-black animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                </div>
+              </div>
+            </div>
+          )}
 
-      <SignedIn>
-        {error && (
-          <div className="mb-4 rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-            {error}
-          </div>
-        )}
+          {emails && (
+            <div className="bg-white border-4 border-black p-4 pixel-shadow mb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-purple-500 border-2 border-black flex items-center justify-center flex-shrink-0">
+                    <i className="ri-mail-fill text-white text-xl"></i>
+                  </div>
+                  <div>
+                    <h1 className="font-PressStart2P text-base font-bold">INBOX</h1>
+                    <p className="text-gray-600">총 {emails?.length}통의 편지</p>
+                  </div>
+                </div>
+                <Link
+                  href="/write"
+                  className="px-3 py-2 bg-purple-500 text-white border-2 border-black text-xs font-bold hover:bg-purple-600 transition-colors pixel-shadow"
+                >
+                  <i className="ri-quill-pen-line mr-1"></i>
+                  편지 쓰기
+                </Link>
+              </div>
+            </div>
+          )}
 
-        {!emails && !error && (
-          <div className="text-sm text-zinc-500">불러오는 중...</div>
-        )}
+          {emails && emails.length === 0 && (
+            <div className="bg-white border-4 border-black p-12 pixel-shadow">
+              <div className="flex flex-col items-center justify-center gap-6">
+                <div className="relative">
+                  <div className="w-24 h-24 bg-gray-300 border-4 border-black pixel-shadow">
+                    <div className="absolute inset-3 bg-gray-200 border-2 border-black flex items-center justify-center">
+                      <i className="ri-mail-line text-gray-400 text-4xl"></i>
+                    </div>
+                    <div className="absolute -top-2 -right-2 w-8 h-8 bg-yellow-400 border-2 border-black transform rotate-12 flex items-center justify-center">
+                      <span className="text-xl">✨</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="text-center space-y-2">
+                  <h3 className="font-bold text-xl text-gray-800">아직 받은 편지가 없어요</h3>
+                  <p className="text-gray-600 text-sm">
+                    먼저 편지를 보내보는건 어떨까요?
+                  </p>
+                </div>
 
-        {emails && emails.length === 0 && (
-          <div className="rounded-lg border border-zinc-200 p-6 text-sm text-zinc-600">
-            받은 편지가 없습니다.
-          </div>
-        )}
+                <Link 
+                  href="/write"
+                  className="inline-block px-6 py-3 bg-purple-500 text-white border-2 border-black font-bold transition-all shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:bg-purple-600 active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                >
+                  <i className="ri-quill-pen-line mr-2"></i>
+                  편지 쓰러 가기
+                </Link>
+              </div>
+            </div>
+          )}
 
-        {emails && emails.length > 0 && (
-          <ul className="space-y-3">
-            {emails.map((m) => {
-              const locked = new Date(m.openAt).getTime() > Date.now();
-              const bodyPreview = locked
-                ? maskBody(m.body)
-                : m.body.slice(0, 180);
-              return (
-                <li key={m.id}>
+          {emails && emails.length > 0 && (
+            <div className="space-y-3">
+              {emails.map((letter) => {
+                const locked = new Date(letter.openAt).getTime() > Date.now();
+                const openAt = new Date(letter.openAt).toLocaleString("ko-KR", {
+                  timeZone: "Asia/Seoul",
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit"
+                }).replace(/\./g, '').replace(/\s/g, '.').replace(/-$/, '');
+
+                return (
                   <Link
-                    href={`/inbox/${m.id}`}
-                    className="block rounded-xl border border-zinc-200 bg-white p-4 shadow-sm transition hover:border-zinc-300 hover:shadow"
+                    key={letter.id}
+                    href={`/letter/${letter.id}`}
+                    className={`relative group block ${locked ? 'bg-gray-100' : 'bg-white'} border-4 border-black p-4 pixel-shadow hover:translate-x-1 hover:translate-y-1 transition-transform`}
                   >
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-zinc-900">
-                          {m.subject || "(제목 없음)"}
-                        </p>
-                        <p className="mt-0.5 text-xs text-zinc-500">
-                          발송일 {formatTime(m.sentAt)} · 봉인 해제{" "}
-                          {formatTime(m.openAt)}
-                        </p>
+                    <div className="flex items-start gap-3">
+                      <div className={`w-10 h-10 ${locked ? 'bg-red-500' : 'bg-green-500'} border-2 border-black flex items-center justify-center flex-shrink-0`}>
+                        <i className={`${locked ? 'ri-mail-open-line' : 'ri-lock-fill'} text-white text-xl`}></i>
                       </div>
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-xs ${
-                          locked
-                            ? "bg-amber-100 text-amber-800"
-                            : "bg-emerald-100 text-emerald-800"
-                        }`}
-                      >
-                        {locked ? "봉인됨" : "열람 가능"}
-                      </span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <h3 className={`text-lg font-bold ${locked ? 'text-gray-500' : 'text-black'} truncate`}>
+                            {letter.subject || "(제목 없음)"}
+                          </h3>
+                          <span className={`text-[14px] ${locked ? 'text-gray-400' : 'text-gray-500'} whitespace-nowrap`}>
+                            {new Date(letter.sentAt).toLocaleString("ko-KR", {
+                              timeZone: "Asia/Seoul",
+                              year: "numeric",
+                              month: "2-digit",
+                              day: "2-digit"
+                            })}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <p className={`text-[14px] ${locked ? 'text-gray-400' : 'text-gray-600'}`}>
+                            <i className="ri-user-fill mr-1"></i>
+                            {letter.recipient}
+                          </p>
+                          {locked && (
+                            <span className="text-[12px] text-red-600 font-bold">
+                              <i className="ri-time-fill mr-1"></i>
+                              {openAt} 개봉
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <p className="mt-3 whitespace-pre-wrap text-sm text-zinc-700">
-                      {bodyPreview}
-                      {bodyPreview.length < m.body.length ? "…" : ""}
-                    </p>
-                    <div className="mt-2 text-xs text-zinc-500">
-                      양식: {m.template} · 받는 사람: {m.recipient ?? "-"}
-                    </div>
+
+                    {locked && (
+                      <div className="absolute left-1/2 bottom-full mb-2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+                        <div className="bg-red-500 border-2 border-black px-3 py-2 pixel-shadow whitespace-nowrap">
+                          <p className="text-[12px] text-white font-bold">
+                            🔒 봉인된 편지는 {formatKoreanDate(openAt)} 전까지 일부 내용만 볼 수 있습니다.
+                          </p>
+                          <div className="absolute left-1/2 top-full -translate-x-1/2 -mt-[2px]">
+                            <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-black"></div>
+                            <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-red-500 absolute left-1/2 -translate-x-1/2 -top-[7px]"></div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </Link>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </SignedIn>
-    </main>
+                )}
+              )}
+            </div>
+          )}
+        </div>
+      </main>
+      
+      <Footer />
+    </div>
   );
-}
-
-function formatTime(input: string) {
-  try {
-    return new Date(input).toLocaleString();
-  } catch {
-    return input;
-  }
-}
-
-function maskBody(text: string) {
-  const keep = Math.max(10, Math.floor(text.length * 0.15));
-  const visible = text.slice(0, keep);
-  const hidden = "•".repeat(Math.max(0, text.length - keep));
-  return visible + hidden;
 }

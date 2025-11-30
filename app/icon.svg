@@ -1,0 +1,24 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 배경 -->
+  <rect width="32" height="32" fill="#A855F7"/>
+  
+  <!-- 편지 봉투 본체 -->
+  <rect x="6" y="10" width="20" height="16" fill="#F3E8FF" stroke="#000" stroke-width="2"/>
+  
+  <!-- 편지 봉투 뚜껑 (픽셀 스타일 삼각형) -->
+  <path d="M6 10 L16 18 L26 10 Z" fill="#E9D5FF" stroke="#000" stroke-width="2"/>
+  
+  <!-- 편지지 (픽셀 스타일) -->
+  <rect x="8" y="14" width="16" height="10" fill="#FFFFFF" stroke="#000" stroke-width="1"/>
+  
+  <!-- 하트 아이콘 (픽셀 스타일) -->
+  <!-- 왼쪽 상단 -->
+  <rect x="13" y="16" width="2" height="2" fill="#EC4899" stroke="#000" stroke-width="0.5"/>
+  <!-- 오른쪽 상단 -->
+  <rect x="17" y="16" width="2" height="2" fill="#EC4899" stroke="#000" stroke-width="0.5"/>
+  <!-- 중앙 -->
+  <rect x="14" y="18" width="4" height="2" fill="#EC4899" stroke="#000" stroke-width="0.5"/>
+  <!-- 하단 -->
+  <rect x="15" y="20" width="2" height="1" fill="#EC4899" stroke="#000" stroke-width="0.5"/>
+</svg>
+

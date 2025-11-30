@@ -49,6 +49,7 @@ export async function GET() {
           name:
             [u?.first_name, u?.last_name].filter(Boolean).join(" ") ||
             (u?.username ?? ""),
+          profilePicture: u?.image_url,
         };
       })
       // 이메일 없는 계정은 제외
