@@ -35,17 +35,23 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  const now = Date.now();
   const emails =
-    (data ?? []).map((row: any) => ({
-      id: row.id,
-      sentAt: row.created_at,
-      subject: row.subject,
-      openAt: row.open_at,
-      body: row.body,
-      template: row.template,
-      recipient: row.recipient_google_id ?? row.recipient_id,
-      senderId: row.sender_id,
-    })) ?? [];
+    (data ?? []).map((row: any) => {
+      const openAtMs = new Date(row.open_at as string).getTime();
+      const locked = Number.isFinite(openAtMs) && openAtMs > now;
+      const body = locked ? String(row.body ?? "").slice(0, 10) : row.body;
+      return {
+        id: row.id,
+        sentAt: row.created_at,
+        subject: row.subject,
+        openAt: row.open_at,
+        body,
+        template: row.template,
+        recipient: row.recipient_google_id ?? row.recipient_id,
+        senderId: row.sender_id,
+      };
+    }) ?? [];
 
   return NextResponse.json({ emails });
 }
