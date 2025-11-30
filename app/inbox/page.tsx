@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import Link from "next/link";
 
 type EmailItem = {
   id: string;
@@ -76,37 +77,39 @@ export default function InboxPage() {
                 ? maskBody(m.body)
                 : m.body.slice(0, 180);
               return (
-                <li
-                  key={m.id}
-                  className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm"
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-zinc-900">
-                        {m.subject || "(제목 없음)"}
-                      </p>
-                      <p className="mt-0.5 text-xs text-zinc-500">
-                        발송일 {formatTime(m.sentAt)} · 봉인 해제{" "}
-                        {formatTime(m.openAt)}
-                      </p>
+                <li key={m.id}>
+                  <Link
+                    href={`/inbox/${m.id}`}
+                    className="block rounded-xl border border-zinc-200 bg-white p-4 shadow-sm transition hover:border-zinc-300 hover:shadow"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-zinc-900">
+                          {m.subject || "(제목 없음)"}
+                        </p>
+                        <p className="mt-0.5 text-xs text-zinc-500">
+                          발송일 {formatTime(m.sentAt)} · 봉인 해제{" "}
+                          {formatTime(m.openAt)}
+                        </p>
+                      </div>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-xs ${
+                          locked
+                            ? "bg-amber-100 text-amber-800"
+                            : "bg-emerald-100 text-emerald-800"
+                        }`}
+                      >
+                        {locked ? "봉인됨" : "열람 가능"}
+                      </span>
                     </div>
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-xs ${
-                        locked
-                          ? "bg-amber-100 text-amber-800"
-                          : "bg-emerald-100 text-emerald-800"
-                      }`}
-                    >
-                      {locked ? "봉인됨" : "열람 가능"}
-                    </span>
-                  </div>
-                  <p className="mt-3 whitespace-pre-wrap text-sm text-zinc-700">
-                    {bodyPreview}
-                    {bodyPreview.length < m.body.length ? "…" : ""}
-                  </p>
-                  <div className="mt-2 text-xs text-zinc-500">
-                    양식: {m.template} · 받는 사람: {m.recipient ?? "-"}
-                  </div>
+                    <p className="mt-3 whitespace-pre-wrap text-sm text-zinc-700">
+                      {bodyPreview}
+                      {bodyPreview.length < m.body.length ? "…" : ""}
+                    </p>
+                    <div className="mt-2 text-xs text-zinc-500">
+                      양식: {m.template} · 받는 사람: {m.recipient ?? "-"}
+                    </div>
+                  </Link>
                 </li>
               );
             })}
