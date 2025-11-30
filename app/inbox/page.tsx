@@ -5,6 +5,7 @@ import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import Link from "next/link";
 
 interface Letter {
   id: number;
